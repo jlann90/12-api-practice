@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import Places from "./Places.jsx";
 import ErrorPage from "./Error.jsx";
 import { sortPlacesByDistance } from "../loc.js";
+import { fetchAvailablePlaces } from "../http.js";
 
 export default function AvailablePlaces({ onSelectPlace }) {
   // when fetching data it is common to have these 3 states - loading, data and error
@@ -18,19 +19,12 @@ export default function AvailablePlaces({ onSelectPlace }) {
 
       // try and catch prevents the app from crashing if the fetch fails, try attempts to run the code contained in the try block, if it fails, the catch block is executed - the areas we're concerned about are the fetch and the if statement
       try {
-        // fetch places from the server
-        const response = await fetch("http://localhost:3000/places");
-        const resData = await response.json();
-
-        // if the response is not ok, throw an error
-        if (!response.ok) {
-          throw new Error("Failed to fetch places.");
-        }
+        const places = await fetchAvailablePlaces();
 
         // get the current position of the user
         navigator.geolocation.getCurrentPosition((position) => {
           const sortedPlaces = sortPlacesByDistance(
-            resData.places,
+            places,
             position.coords.latitude,
             position.coords.longitude
           );
